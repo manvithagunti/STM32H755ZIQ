@@ -253,6 +253,13 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle);
 
 void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName);
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx);
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle);
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle);
 
-void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t event);
+void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv);
+//this has to be implemented by the applocation. and since we dont know what the application might implement it as,
+//we need to give it a weak implementation
+
 #endif /* INC_STM32H7XX_SPI_DRIVER_H_ */

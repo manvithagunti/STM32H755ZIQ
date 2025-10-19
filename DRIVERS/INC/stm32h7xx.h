@@ -13,6 +13,7 @@
 
 
 #define __vo volatile
+#define __weak __attribute__((weak))
 
 /*
  * *****************PROCESSOR SPECIFIC DETAILS*******************************/

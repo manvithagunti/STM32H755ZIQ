@@ -10,7 +10,7 @@
 
 
 
-static void spi_txp_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_txp_interrupt_handle(SPI_Handle_t *pSPIHandle);//static keyword because they are private functions
 static void spi_rxp_interrupt_handle(SPI_Handle_t *pSPIHandle);
 static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
 
@@ -460,6 +460,7 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer, uint32_t 
 
 
 //SOME HELPER FUNCTION IMPLEMENTATIONS
+//user application should not call these helper functions. these are private functions
 
 static void spi_txp_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
@@ -489,10 +490,7 @@ static void spi_txp_interrupt_handle(SPI_Handle_t *pSPIHandle)
 	    		//TXLen is zero so close the spi transmission
 	    		//and inform the application that TX is over
 	    		//THIS PREVENTS INTERRUPTS FROM SETTING UP OF TXP FLAG
-	    		pSPIHandle->pSPIx->IER &= ~(1<<SPI_IER_TXPIE_POS);
-	    		pSPIHandle->pTxBuffer = NULL;
-	    		pSPIHandle->TxLen=0;
-	    		pSPIHandle->TxState= SPI_READY;
+	    		SPI_CloseTransmission(pSPIHandle);
 	    		SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_TX_CMPLT);
 	    	}
 }
@@ -507,14 +505,14 @@ static void spi_rxp_interrupt_handle(SPI_Handle_t *pSPIHandle)
 
 		    		// 16bit DFF
 		    		//1. load the data into the TXDR
-		    		*((uint16_t*)&(pSPIHandle->pSPIx->RXDR)) = *((uint16_t*)pSPIHandle->pRxBuffer);
+		    		*((uint16_t*)pSPIHandle->pRxBuffer)= *((uint16_t*)&(pSPIHandle->pSPIx->RXDR));
 		    		pSPIHandle->RxLen--;
 		    		pSPIHandle->RxLen--;//cause we sent out 2 bytes of data
 		    		pSPIHandle->pRxBuffer +=2;
 
 		    	}else if(dsize == 8)
 		    	{
-		    		*((uint8_t*)&(pSPIHandle->pSPIx->RXDR)) = *pSPIHandle->pRxBuffer;
+		    		*pSPIHandle->pRxBuffer= *((uint8_t*)&(pSPIHandle->pSPIx->RXDR));
 		    		pSPIHandle->RxLen--;
 		    		pSPIHandle->pRxBuffer++;
 		    	}
@@ -524,19 +522,53 @@ static void spi_rxp_interrupt_handle(SPI_Handle_t *pSPIHandle)
 		    		//TXLen is zero so close the spi transmission
 		    		//and inform the application that TX is over
 		    		//THIS PREVENTS INTERRUPTS FROM SETTING UP OF RXP FLAG
-		    		pSPIHandle->pSPIx->IER &= ~(1<<SPI_IER_RXPIE_POS);
-		    		pSPIHandle->pRxBuffer = NULL;
-		    		pSPIHandle->RxLen=0;
-		    		pSPIHandle->RxState= SPI_READY;
+		    		SPI_CloseReception(pSPIHandle);
 		    		SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_RX_CMPLT);
 		    	}
 }
 static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
 
+	//uint8_t temp;
+    //clear the OVR flag
+	if(pSPIHandle->TxState != SPI_BUSY_IN_TX)
+	{
+	   //CLEARING THE OVR BIT
+		pSPIHandle->pSPIx->IER &= ~(1<<6);//CLEARING THE OVRIE BIT TO DISABLE THE OVR INTERRUPT
+	}
+	//and inform the application
+	SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_OVR_ERR);
+
+
 }
 
-void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t event){
+__weak void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv)
+{
+         //this is a weak implementation adn the application will re-write this implenentation
+		 //if application does not implement this function, this call back will be called
+}
+
+
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->IER &= ~(1<<SPI_IER_TXPIE_POS);
+    pSPIHandle->pTxBuffer = NULL;//NULL IS DEFINED IN stddef.h
+	pSPIHandle->TxLen=0;
+	pSPIHandle->TxState= SPI_READY;
+}
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->IER &= ~(1<<SPI_IER_RXPIE_POS);
+	pSPIHandle->pRxBuffer = NULL;
+	pSPIHandle->RxLen=0;
+	pSPIHandle->RxState= SPI_READY;
+}
+
+
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
+{
+	pSPIx->IER &= ~(1<<6);
+	//CLEARING THE OVRIE BIT TO DISABLE THE OVR INTERRUPT
 
 }
 

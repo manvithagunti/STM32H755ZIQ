@@ -165,6 +165,14 @@ typedef struct
 #define SPI5          ((SPI_RegDef_t*)SPI5_BASEADDR)
 #define SPI6          ((SPI_RegDef_t*)SPI6_BASEADDR)
 
+#define I2C1          ((I2C_RegDef_t*)I2C1_BASEADDR)
+#define I2C2          ((I2C_RegDef_t*)I2C2_BASEADDR)
+#define I2C3          ((I2C_RegDef_t*)I2C3_BASEADDR)
+#define I2C4          ((I2C_RegDef_t*)I2C4_BASEADDR)
+
+
+
+
 
 
 /*
@@ -265,6 +273,15 @@ typedef struct
 #define SPI4_REG_RESET()        do{ (RCC ->APB2RSTR  |= (1<<13)); (RCC ->APB2RSTR  &= ~(1<<13)); } while(0)
 #define SPI5_REG_RESET()        do{ (RCC ->APB2RSTR  |= (1<<20)); (RCC ->APB2RSTR  &= ~(1<<20)); } while(0)
 #define SPI6_REG_RESET()        do{ (RCC ->APB4RSTR  |= (1<<5 )); (RCC ->APB4RSTR  &= ~(1<<5 )); } while(0)
+
+/*
+ *macros to reset I2C peripherals
+ */
+#define I2C1_REG_RESET()        do{ (RCC ->APB1LRSTR  |= (1<<21)); (RCC ->APB1LRSTR  &= ~(1<<21)); } while(0)
+#define I2C2_REG_RESET()        do{ (RCC ->APB1LRSTR  |= (1<<22)); (RCC ->APB1LRSTR  &= ~(1<<22)); } while(0)
+#define I2C3_REG_RESET()        do{ (RCC ->APB1LRSTR  |= (1<<23)); (RCC ->APB1LRSTR  &= ~(1<<23)); } while(0)
+#define I2C4_REG_RESET()        do{ (RCC ->APB4RSTR   |= (1<<7) ); (RCC ->APB4RSTR   &= ~(1<<7) ); } while(0)
+
 
 
 /*
@@ -584,7 +601,30 @@ typedef struct
 
  }SPI_RegDef_t;
 
+
+
+ /*
+  * PERIPHERAL REGISTER DEFINITION FOR I2C PERIPHERAL
+  */
+
+ typedef struct
+  {
+     __vo uint32_t CR1;
+     __vo uint32_t CR2;
+     __vo uint32_t OAR1;
+     __vo uint32_t OAR2;
+     __vo uint32_t TIMINGR;
+     __vo uint32_t TIMEOUTR;
+     __vo uint32_t ISR;
+     __vo uint32_t ICR;
+     __vo uint32_t PECR;
+     __vo uint32_t RXDR;
+     __vo uint32_t TXDR;
+
+  }I2C_RegDef_t;
+
 #include "stm32h7xx_gpio_driver.h"
 #include "stm32h7xx_spi_driver.h"
+#include "stm32h7xx_i2c_driver.h"
 
 #endif /* INC_STM32H7XX_H_ */

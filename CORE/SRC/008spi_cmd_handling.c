@@ -27,7 +27,7 @@
 #define ANALOG_PIN5     5
 //arduino led
 
-#define LED_PIN         9
+#define LED_PIN         8
 
 void delay(void)
 {
@@ -35,9 +35,11 @@ void delay(void)
 }
 
 
-//PB15-SPI2_MOSI
-//PB13-SPI2_SCK
-//PB12-SPI2_NSS
+//PE6-SPI4_MOSI
+//PE2-SPI4_SCK
+//PE4-SPI4_NSS
+//PE5-SPI4_MISO
+
 
 void SPI4_GPIOInits(void)
 {
@@ -69,17 +71,7 @@ void SPI4_GPIOInits(void)
 	SPIPins.GPIO_PinConfig.GPIO_PinNumber =GPIO_PIN_NO_4;
 	GPIO_Init(&SPIPins);
 
-	//mco2 cnfg
-//	GPIOA_PCLK_EN();
-//	GPIO_Handle_t MCOPins={0};
-//	MCOPins.pGPIOx = GPIOA;
-//	MCOPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-//	MCOPins.GPIO_PinConfig.GPIO_PinAltFunMode =0;
-//	MCOPins.GPIO_PinConfig.GPIO_PinOPType= GPIO_OP_TYPE_PP;
-//	MCOPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-//	MCOPins.GPIO_PinConfig.GPIO_PinSpeed= GPIO_SPEED_HIGH;
-//	MCOPins.GPIO_PinConfig.GPIO_PinNumber =GPIO_PIN_NO_8;
-//	GPIO_Init(&MCOPins);
+
 
 }
 
@@ -105,7 +97,7 @@ void SPI4_Inits(void)
 	SPI_PeriClockControl(SPI4, ENABLE);
 
 	SPI4_GPIOInits();
-	SPI4handle.SPIConfig.SPI_BusConfig= SPI_BUS_CONFIG_SIMPLEX_TXONLY;
+	SPI4handle.SPIConfig.SPI_BusConfig= SPI_BUS_CONFIG_FD;
 	SPI4handle.SPIConfig.SPI_DeviceMode=SPI_DEVICE_MODE_MASTER;
 	SPI4handle.SPIConfig.SPI_SclkSpeed=SPI_SCLK_SPEED_DIV8;//GENERATES SERIAL CLOCK OF 2MHz
 	SPI4handle.SPIConfig.SPI_DFF= SPI_DFF_8BITS;
@@ -119,16 +111,16 @@ void SPI4_Inits(void)
 
 void GPIO_ButtonInit(void)
 {
-	    GPIO_Handle_t GpioBtn;
-	    //THIS IS BTN GPIO CONFIG
-		GpioBtn.pGPIOx = GPIOB;
-		GpioBtn.GPIO_PinConfig.GPIO_PinNumber =GPIO_PIN_NO_12;
-		GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
-		GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-		//OP TYPE NOT APPLICABLE NOW AS THE MODE IS NOT OUTPUT
-		GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;//NO PUPD BECAUSE EXTERNAL PULL DOWN IS THERE. CHECK SCHEMATICS OF B1. PAGE 3
+	 GPIO_Handle_t GpioBtn;
+		    //THIS IS BTN GPIO CONFIG
+			GpioBtn.pGPIOx = GPIOC;
+			GpioBtn.GPIO_PinConfig.GPIO_PinNumber =GPIO_PIN_NO_13;
+			GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+			GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+			//OP TYPE NOT APPLICABLE NOW AS THE MODE IS NOT OUTPUT
+			GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;//NO PUPD BECAUSE EXTERNAL PULL DOWN IS THERE. CHECK SCHEMATICS OF B1. PAGE 3
 
-		GPIO_Init(&GpioBtn);
+			GPIO_Init(&GpioBtn);
 
 }
 
@@ -157,13 +149,10 @@ int main(void)
 	while(1)
 	{
 
-	    while(! GPIO_ReadFromInputPin(GPIOB, GPIO_PIN_NO_12) );
+	    while(! GPIO_ReadFromInputPin(GPIOC, GPIO_PIN_NO_13) );
 
 	    //TO AVOID BUTTON DEBOUNCING
 	    delay();
-
-        //ENABLING THE spi4 peripheral
-	    SPI_PeripheralControl(SPI4,ENABLE);
 
 
 
@@ -176,11 +165,11 @@ int main(void)
 	    //SEND COMMAND
 	    SPI_SendData(SPI4, &commandcode,1);
 
-	    //do dummy read
-	    SPI_ReceiveData(SPI4,&dummy_read,1);
+//	    //do dummy read
+//	    SPI_ReceiveData(SPI4,&dummy_read,1);
 
-	    //send some dummy bits(1byte) to fetch the response from the slave
-	    SPI_SendData(SPI4, &dummy_write,1);
+//	    //send some dummy bits(1byte) to fetch the response from the slave
+//	    SPI_SendData(SPI4, &dummy_write,1);
 
 	    //READ THE ACK BYTE RECEIVED
 	    SPI_ReceiveData(SPI4, &ackbyte,1);
@@ -198,7 +187,7 @@ int main(void)
 	    //2. CMD_SENSOR_READ    <analog pin number (1)>
 
 	    //wait till button is pressed
-	    while(! GPIO_ReadFromInputPin(GPIOB, GPIO_PIN_NO_12) );
+	    while(! GPIO_ReadFromInputPin(GPIOC, GPIO_PIN_NO_13) );
 
 	    //TO AVOID BUTTON DEBOUNCING
 	    delay();

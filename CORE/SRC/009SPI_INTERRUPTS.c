@@ -155,7 +155,7 @@ int main(void)
 	 */
 	SPI_SSOEConfig(SPI4, ENABLE);
 
-	SPI_IRQInterruptConfig(IRQ_NO_SPI2,ENABLE);
+	SPI_IRQInterruptConfig(IRQ_NO_SPI4,ENABLE);
 
 		while(1){
 

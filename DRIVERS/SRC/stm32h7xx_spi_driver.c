@@ -157,7 +157,15 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName)
 void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
 {
 
+//	uint8_t rxdata;
 	//SETTING TSIZE=len
+
+
+	//SETTING MODE AS SIMPLEX TRANSMIT
+	pSPIx->CFG2 &= ~(0X3<<17);
+	pSPIx->CFG2 |= 0X1<<17;
+
+
 	pSPIx->CR2 &= ~(0xff <<0);
 	pSPIx->CR2 |=(Len <<0);
 
@@ -195,6 +203,8 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
     	}else if(dsize == 8)
     	{
     		*((uint8_t*)&(pSPIx->TXDR)) = *pTxBuffer;
+
+//    		 rxdata = *((uint8_t*)&(pSPIx->RXDR));
     		Len--;
     		pTxBuffer++;
     	}
@@ -239,6 +249,10 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer, uint32_t Len)
 
 	//SETTING TSIZE=len
 		pSPIx->CR2 |=(Len <<0);
+
+		//SETTING MODE AS SIMPLEX RECEIVE
+		pSPIx->CFG2 &= ~(0X3<<17);
+		pSPIx->CFG2 |= 0X2<<17;
 
 
 	// 1. Enable SPI peripheral if not already enabled

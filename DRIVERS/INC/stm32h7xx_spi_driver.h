@@ -134,6 +134,7 @@ typedef struct
 #define SPI_EVENT_RX_CMPLT             2
 #define SPI_EVENT_OVR_ERR              3
 //#define SPI_EVENT_CRC_ERR            4
+#define SPI_EVENT_RX_1BYTE			   5
 
 
 
